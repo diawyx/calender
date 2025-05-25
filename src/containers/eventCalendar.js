@@ -37,7 +37,6 @@ class EventCalendar extends Component {
     }
 
     handleShow(slotInfo, eventType) {
-
         var currentIndex = this.props.events.allEvents.length;
         this.setState(
             { showModal: true, eventType: eventType, eventInfo: slotInfo, newIndex: currentIndex }
@@ -85,19 +84,53 @@ class EventCalendar extends Component {
             'style': style
         };
     }
-    
+
+    // ✅ Cek reminder 10 menit sebelum event
+    checkReminder() {
+        const now = new Date();
+        this.props.events.allEvents.forEach(event => {
+            const startTime = new Date(event.start);
+            const timeDiff = (startTime - now) / 60000; // dalam menit
+
+            if (timeDiff > 0 && timeDiff <= 10) {
+                // Cek kalau notifikasi belum dikirim
+                if (!event.notified) {
+                    // Trigger browser notification
+                    if (Notification.permission === 'granted') {
+                        new Notification("📅 Event Reminder", {
+                            body: `Event "${event.title}" akan dimulai dalam ${Math.ceil(timeDiff)} menit!`,
+                            icon: '/icon.png'
+                        });
+                    }
+
+                    // Set flag supaya gak notif terus-terusan
+                    event.notified = true;
+                }
+            }
+        });
+    }
 
     render() {
+        // ✅ Jalankan pengecekan reminder di setiap render
+        this.checkReminder();
+
         return (
             <div className="bodyContainer">
                 <div className="well well-sm">
-                <h3 className="instruction">Instructions</h3>
-                <strong>To add an event: </strong> Click on the day you want to add an event or drag up to the day you want to add the event for multiple day event! <br/>
-                <strong>To update and delete an event:</strong> Click on the event you wish to update or delete!
+                    <h3 className="instruction">Instructions</h3>
+                    <strong>To add an event: </strong> Click on the day you want to add an event or drag up to the day you want to add the event for multiple day event! <br/>
+                    <strong>To update and delete an event:</strong> Click on the event you wish to update or delete!
                 </div>
-                <EventDetails showModal={this.state.showModal} handleHide={this.handleHide} eventType={this.state.eventType} eventInfo={this.state.eventInfo}
-                newIndex = {this.state.newIndex} 
-                deleteEvent ={this.deleteEvent} addEvent={this.addEvent} updateEvent={this.updateEvent}/>
+                <EventDetails 
+                    showModal={this.state.showModal} 
+                    handleHide={this.handleHide} 
+                    eventType={this.state.eventType} 
+                    eventInfo={this.state.eventInfo}
+                    newIndex = {this.state.newIndex} 
+                    deleteEvent ={this.deleteEvent} 
+                    addEvent={this.addEvent} 
+                    updateEvent={this.updateEvent}
+                />
                 <BigCalendar
                     selectable
                     events={this.props.events.allEvents}
@@ -109,9 +142,7 @@ class EventCalendar extends Component {
                     onSelectSlot={slotInfo => this.handleShow(slotInfo, 'add')}
                     style={{ minHeight: '500px' }}
                     eventPropGetter={this.eventStyle}
-
                 />
-
             </div>
         );
     }
