@@ -1,0 +1,123 @@
+name: CI Pipeline (No GCP Interaction)
+
+on:
+  push:
+    branches:
+      - main # Atau branch develop, feature/*, dll.
+  pull_request:
+    branches:
+      - main
+
+# env:
+  # Variabel GCP belum diperlukan jika tidak ada interaksi dengan GCP
+  # GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  # GCP_ARTIFACT_REGISTRY_REPOSITORY: 'your-artifact-registry-repo'
+  # GCP_CLOUD_RUN_SERVICE_NAME_TESTING: 'your-app-testing'
+  # GCP_CLOUD_RUN_SERVICE_NAME_PRODUCTION: 'your-app-production'
+  # GCP_REGION: 'your-gcp-region'
+
+jobs:
+  build-and-scan:
+    name: Build, Scan, and Create Docker Image
+    runs-on: ubuntu-latest
+    # permissions:
+      # contents: read
+      # id-token: write # Tidak diperlukan jika tidak otentikasi ke GCP
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK (jika diperlukan SonarQube Scanner)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17' # Sesuaikan dengan versi Java yang dibutuhkan SonarQube
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Pastikan SONAR_TOKEN dan SONAR_HOST_URL sudah di-set di GitHub Secrets
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        # Tambahkan with: args: '...' jika ada parameter tambahan untuk scanner
+
+      # Langkah otentikasi ke GCP dihilangkan/dikomentari
+      # - name: Authenticate to Google Cloud
+      #   uses: 'google-github-actions/auth@v2'
+      #   with:
+      #     workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_ID_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_WIF_POOL_ID }}/providers/${{ secrets.GCP_WIF_PROVIDER_ID }}'
+      #     service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Langkah konfigurasi Docker untuk Artifact Registry dihilangkan/dikomentari
+      # - name: Configure Docker for Artifact Registry
+      #   run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      - name: Build Docker image (local only)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false # Diubah menjadi false, image hanya dibangun, tidak di-push
+          tags: |
+            ${{ github.event.repository.name }}:${{ github.sha }}
+            ${{ github.event.repository.name }}:latest-build
+          # Tag di atas adalah contoh, tidak lagi menargetkan GCP Artifact Registry
+
+  # Job deploy-testing dihilangkan/dikomentari karena memerlukan interaksi GCP
+  # deploy-testing:
+  #   name: Deploy to GCP Testing Environment
+  #   needs: build-and-scan
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   environment:
+  #     name: testing
+  #     url: ${{ steps.deploy.outputs.url }}
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Authenticate to Google Cloud
+  #       uses: 'google-github-actions/auth@v2'
+  #       # ... (konfigurasi otentikasi)
+  #     - name: Deploy to Cloud Run (Testing)
+  #       id: deploy
+  #       uses: google-github-actions/deploy-cloudrun@v2
+  #       # ... (konfigurasi deployment)
+
+  # Job approve-production dihilangkan/dikomentari
+  # approve-production:
+  #   name: Approve for Production Deployment
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   needs: deploy-testing
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: production-approval
+  #   steps:
+  #     - name: Manual Approval
+  #       uses: trstringer/manual-approval@v1
+  #       # ... (konfigurasi approval)
+
+  # Job deploy-production dihilangkan/dikomentari karena memerlukan interaksi GCP
+  # deploy-production:
+  #   name: Deploy to GCP Production Environment
+  #   needs: approve-production
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   environment:
+  #     name: production
+  #     url: ${{ steps.deploy.outputs.url }}
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Authenticate to Google Cloud
+  #       uses: 'google-github-actions/auth@v2'
+  #       # ... (konfigurasi otentikasi)
+  #     - name: Deploy to Cloud Run (Production)
+  #       id: deploy
+  #       uses: google-github-actions/deploy-cloudrun@v2
+  #       # ... (konfigurasi deployment)
