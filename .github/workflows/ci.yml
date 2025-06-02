@@ -40,7 +40,7 @@ jobs:
         with:
           # Tambahkan baris 'args' di bawah ini
           args: >
-            -Dsonar.organization=psokel11
+            -Dsonar.organization=psokelompok11
             -Dsonar.projectKey=diawyx_calender
 
       # --- Tahap 2: Build Docker Image (HANYA JIKA SONARCLOUD SUKSES) ---
