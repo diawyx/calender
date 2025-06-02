@@ -36,7 +36,7 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master # Action spesifik untuk SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}  # Otomatis ada, diperlukan untuk analisis Pull Request
-          SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }} # WAJIB: Token dari SonarCloud, simpan di GitHub Secrets
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # WAJIB: Token dari SonarCloud, simpan di GitHub Secrets
         # with: # Opsional, jika SonarCloud tidak bisa otomatis mendeteksi parameter proyek
         #   projectBaseDir: '.'
         #   args: >
