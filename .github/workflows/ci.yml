@@ -37,11 +37,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}  # Otomatis ada, diperlukan untuk analisis Pull Request
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # WAJIB: Token dari SonarCloud, simpan di GitHub Secrets
-        # with: # Opsional, jika SonarCloud tidak bisa otomatis mendeteksi parameter proyek
-        #   projectBaseDir: '.'
-        #   args: >
-        #     -Dsonar.organization=nama-organisasimu-di-sonarcloud
-        #     -Dsonar.projectKey=kunci-proyekmu-di-sonarcloud
+        with:
+          # Tambahkan baris 'args' di bawah ini
+          args: >
+            -Dsonar.organization=psokel11
+            -Dsonar.projectKey=calender
 
       # --- Tahap 2: Build Docker Image (HANYA JIKA SONARCLOUD SUKSES) ---
       - name: 🐳 Set up Docker Buildx
