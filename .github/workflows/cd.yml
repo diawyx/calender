@@ -7,7 +7,7 @@ on:
     types:
       - completed
     branches:
-      - main # Hanya picu CD jika workflow CI di branch main yang selesai
+      - development # Hanya picu CD jika workflow CI di branch main yang selesai
 
 env:
   # Nama image di Docker Hub (harus konsisten dengan di CI)
