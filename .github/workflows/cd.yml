@@ -8,6 +8,7 @@ on:
       - completed
     branches:
       - development # Hanya picu CD jika workflow CI di branch main yang selesai
+      - main
 
 env:
   # Nama image di Docker Hub (harus konsisten dengan di CI)
