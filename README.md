@@ -1,4 +1,4 @@
-## React-Calendar-Events
+## React-Calendar-Events.
 This is a simple progressive web app react application that showcases CRUD operation in react redux.
 
 This application utilizes <a href="https://github.com/intljusticemission/react-big-calendar"> react-big-calendar </a> and 
