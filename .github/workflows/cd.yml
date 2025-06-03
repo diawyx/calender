@@ -3,7 +3,7 @@ name: CD Pipeline - Deploy to GCP Cloud Run
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline - Scan, Build, Push"] # HARUS SAMA PERSIS dengan nama workflow CI di atas
+    workflows: ["CI Pipeline - Scan with SonarCloud, Build Image, Push to Docker Hub."] # HARUS SAMA PERSIS dengan nama workflow CI di atas
     types:
       - completed
     branches:
