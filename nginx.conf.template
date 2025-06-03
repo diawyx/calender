@@ -1,0 +1,27 @@
+# nginx.conf.template
+server {
+    # Nginx akan mendengarkan pada port yang nilainya akan disuntikkan
+    # dari environment variable PORT oleh envsubst.
+    # Cloud Run akan menyetel PORT ini (biasanya ke 8080).
+    listen ${PORT} default_server;
+    listen [::]:${PORT} default_server;
+
+    # Direktori root tempat file statis React berada
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+
+    # Konfigurasi untuk menangani routing di React (single-page application)
+    # Jika file atau direktori yang diminta tidak ditemukan, kembalikan index.html
+    # agar React Router bisa menangani routing di sisi klien.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Opsional: Tambahkan konfigurasi Nginx lainnya di sini jika perlu
+    # Misalnya, pengaturan caching, gzip, header keamanan, dll.
+    # Contoh:
+    # location ~* \.(?:ico|css|js|gif|jpe?g|png)$ {
+    #   expires 1y;
+    #   add_header Cache-Control "public";
+    # }
+}
