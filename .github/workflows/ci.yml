@@ -1,4 +1,4 @@
-name: CI Pipeline - Scan with SonarCloud, Build Image, Push to Docker Hub
+name: CI Pipeline - Scan with SonarCloud, Build Image, Push to Docker Hub.
 
 on:
   push:
