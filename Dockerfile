@@ -1,28 +1,32 @@
-# Gunakan image node untuk build
+# Tahap build React app
 FROM node:20-alpine AS build
 
+# Set workdir
 WORKDIR /app
 
-# Copy package.json dan package-lock.json
+# Copy dependency files
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy semua file ke workdir
+# Copy semua source code
 COPY . .
 
-# Build react app
+# Build React app
 RUN npm run build
 
-# Gunakan nginx untuk serving build file
+# Tahap production pakai Nginx
 FROM nginx:alpine
 
-# Copy build hasil dari stage sebelumnya
+# Copy custom nginx config ke container
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy hasil build React ke folder default Nginx
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Expose port 80
+# Expose port 8080 ke Cloud Run
 EXPOSE 8080
 
-# Start nginx
+# Command buat start nginx
 CMD ["nginx", "-g", "daemon off;"]
