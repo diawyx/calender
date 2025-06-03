@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - development # Atau branch develop, feature/*, dll.
-  pull_request:
-    branches:
-      - main
 
 env:
   # Nama image di Docker Hub (otomatis menggunakan nama repository GitHub kamu)
