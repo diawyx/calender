@@ -3,7 +3,7 @@ name: CI Pipeline - Scan with SonarCloud, Build Image, Push to Docker Hub.
 on:
   push:
     branches:
-      - main # Atau branch develop, feature/*, dll.
+      - development # Atau branch develop, feature/*, dll.
   pull_request:
     branches:
       - main
