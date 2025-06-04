@@ -1,13 +1,12 @@
-# .github/workflows/ci.yml
 name: CI Pipeline - Scan with SonarCloud, Build Image, Push to Docker Hub.
 
 on:
   push:
     branches:
-      - main # Ini hanya akan terpicu pada push ke branch 'main'
+      - main # Atau branch develop, feature/*, dll.
   pull_request:
     branches:
-      - main # Ini akan terpicu pada pull request ke branch 'main'
+      - main
 
 env:
   # Nama image di Docker Hub (otomatis menggunakan nama repository GitHub kamu)
@@ -15,13 +14,9 @@ env:
   DOCKERHUB_IMAGE_NAME: ${{ github.event.repository.name }}
 
 jobs:
-  # --- Job 1: Code Quality, Testing, and SonarCloud Scan ---
-  code-quality-and-test:
-    name: Code Quality Scan & Tests
+  scan-build-and-push: # Nama job diubah sedikit untuk mencerminkan urutan
+    name: Scan with SonarCloud, Build and Push Docker Image
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: read # Default permissions should be enough, but explicitly stating is good.
-    #   security-events: write # If SonarCloud needs to push security alerts to GitHub
 
     steps:
       - name: ⬇️ Checkout code
@@ -29,64 +24,48 @@ jobs:
         with:
           fetch-depth: 0 # Diperlukan SonarCloud untuk analisis akurat pada 'new code'
 
-      - name: 🟢 Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18' # Sesuaikan dengan versi Node.js yang digunakan proyek kamu
-
-      - name: 📦 Install Node.js dependencies
-        run: npm ci # atau yarn install --frozen-lockfile jika kamu menggunakan Yarn
-
-      - name: 🧪 Run Jest Tests
-        run: npm test # Asumsi script 'test' di package.json kamu menjalankan Jest
-        # Jika kamu ingin Jest menghasilkan laporan untuk SonarCloud, tambahkan argumen output:
-        # run: npm test -- --coverage --coverageReporters=lcov --testResultsProcessor="jest-sonar-reporter"
-
       - name: ☕ Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17' # Sesuaikan versi Java yang dibutuhkan SonarCloud Scanner
 
+      # --- Tahap 1: Analisis Kualitas Kode Statis dengan SonarCloud ---
       - name: SonarCloud Scan 🌥️
         # Jika SonarCloud Quality Gate gagal, job akan berhenti di sini.
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarcloud-github-action@master # Action spesifik untuk SonarCloud
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}  # Otomatis ada, diperlukan untuk analisis Pull Request
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # WAJIB: Token dari SonarCloud, simpan di GitHub Secrets
         with:
+          # Tambahkan baris 'args' di bawah ini
           args: >
             -Dsonar.organization=psokelompok11
             -Dsonar.projectKey=diawyx_calender
-            # Jika kamu ingin SonarCloud membaca laporan coverage dari Jest:
-            # -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
-  # --- Job 2: Build and Push Docker Image (Tergantung pada keberhasilan Job 1) ---
-  build-and-push-docker:
-    name: Build & Push Docker Image
-    runs-on: ubuntu-latest
-    needs: code-quality-and-test # Job ini akan berjalan HANYA JIKA 'code-quality-and-test' sukses
-    if: needs.code-quality-and-test.result == 'success' # Pastikan hanya berjalan jika job sebelumnya sukses
-
-    steps:
-      - name: ⬇️ Checkout code (for Docker build)
-        uses: actions/checkout@v4
-        # Tidak perlu fetch-depth: 0 lagi karena SonarCloud sudah di job sebelumnya
-
+      # --- Tahap 2: Build Docker Image (HANYA JIKA SONARCLOUD SUKSES) ---
       - name: 🐳 Set up Docker Buildx
+        if: success() # Hanya berjalan jika langkah SonarCloud sukses
         uses: docker/setup-buildx-action@v3
 
+      # Langkah build image sekarang digabung dengan push, atau bisa dipisah jika mau verifikasi dulu
+      # Untuk kesederhanaan, kita gabung saja build dan push setelah SonarCloud sukses
+
+      # --- Tahap 3: Login & Push Docker Image ke Docker Hub (HANYA JIKA SONARCLOUD SUKSES) ---
       - name: 🐳 Log in to Docker Hub
+        if: success() # Memastikan semua langkah sebelumnya (termasuk SonarCloud) sukses
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }} # WAJIB diisi di GitHub Secrets
+          password: ${{ secrets.DOCKERHUB_TOKEN }}    # WAJIB diisi di GitHub Secrets
 
       - name: ⬆️ Build and Push Docker image to Docker Hub
+        if: success() # Memastikan semua langkah sebelumnya (termasuk SonarCloud) sukses
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: true # Image akan di-build dan langsung di-push ke Docker Hub
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_IMAGE_NAME }}:latest
+          # Jika repository Docker Hub kamu adalah private, pastikan token memiliki izin yang sesuai.
