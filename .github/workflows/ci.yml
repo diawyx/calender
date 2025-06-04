@@ -59,11 +59,3 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ github.sha }}
-
-      - name: ⬆️ Tag and Push Docker image with latest tag
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_IMAGE_NAME }}:latest
