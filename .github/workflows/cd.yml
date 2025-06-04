@@ -16,8 +16,8 @@ env:
   # Variabel GCP (SET DI GITHUB SECRETS atau langsung jika tidak sensitif)
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: 'asia-southeast1' # GANTI dengan region GCP kamu
-  GCP_CLOUD_RUN_SERVICE_TESTING: 'nama-aplikasi-testing' # GANTI nama service Cloud Run testing kamu
-  GCP_CLOUD_RUN_SERVICE_PRODUCTION: 'nama-aplikasi-produksi' # GANTI nama service Cloud Run produksi kamu
+  GCP_CLOUD_RUN_SERVICE_TESTING: 'calendar-testing' # GANTI nama service Cloud Run testing kamu
+  GCP_CLOUD_RUN_SERVICE_PRODUCTION: 'calendar-production' # GANTI nama service Cloud Run produksi kamu
 
 jobs:
   deploy-testing:
