@@ -1,43 +1,37 @@
-# .github/workflows/cd.yml
 name: CD Pipeline - Deploy to GCP Cloud Run
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline - Scan with SonarCloud, Build Image, Push to Docker Hub."] # HARUS SAMA PERSIS dengan nama workflow CI di atas
+    workflows: ["CI Pipeline - Scan with SonarCloud, Build Image, Push to Docker Hub."] 
     types:
       - completed
     branches:
-      - main # Hanya picu CD jika workflow CI di branch main yang selesai
+      - main 
 
 env:
-  # Nama image di Docker Hub (harus konsisten dengan di CI)
-  DOCKERHUB_IMAGE_NAME: ${{ github.event.workflow_run.repository.name }} # Ambil nama repo dari konteks workflow_run
+  DOCKERHUB_IMAGE_NAME: ${{ github.event.workflow_run.repository.name }} 
 
-  # Variabel GCP (SET DI GITHUB SECRETS atau langsung jika tidak sensitif)
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION: 'asia-southeast1' # GANTI dengan region GCP kamu
-  GCP_CLOUD_RUN_SERVICE_TESTING: 'calendar-testing' # GANTI nama service Cloud Run testing kamu
-  GCP_CLOUD_RUN_SERVICE_PRODUCTION: 'calendar-production' # GANTI nama service Cloud Run produksi kamu
+  GCP_REGION: 'asia-southeast1' 
+  GCP_CLOUD_RUN_SERVICE_TESTING: 'calendar-testing' 
+  GCP_CLOUD_RUN_SERVICE_PRODUCTION: 'calendar-production' 
 
 jobs:
   deploy-testing:
     name: 🚀 Deploy to GCP Testing
-    # Hanya berjalan jika workflow CI yang memicunya sukses
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
-      contents: read   # Untuk checkout kode pada commit yang tepat
-      id-token: write  # Untuk otentikasi ke GCP via Workload Identity Federation
+      contents: read   
+      id-token: write  
 
     environment:
       name: testing
-      # url: ${{ steps.deploy_testing_step.outputs.url }}
 
     steps:
       - name: ⬇️ Checkout code at specific commit from CI
         uses: actions/checkout@v4
         with:
-          # Menggunakan head_sha dari workflow_run untuk checkout commit yang sama dengan CI
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: 🔑 Authenticate to Google Cloud
@@ -53,7 +47,6 @@ jobs:
           service: ${{ env.GCP_CLOUD_RUN_SERVICE_TESTING }}
           project_id: ${{ env.GCP_PROJECT_ID }}
           region: ${{ env.GCP_REGION }}
-          # Tarik image dari Docker Hub dengan tag SHA commit dari workflow CI
           image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ github.event.workflow_run.head_sha }}
 
   approve-production:
@@ -62,8 +55,8 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
-      name: production-approval # Konfigurasikan environment ini di GitHub dengan approvers
-
+      name: production-approval 
+      
     steps:
       - name: Manual Approval Required
         run: echo "Menunggu approval untuk deployment ke Produksi via GitHub Environments."
@@ -90,7 +83,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_ID_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_WIF_POOL_ID }}/providers/${{ secrets.GCP_WIF_PROVIDER_ID }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL_PRODUCTION }}' # Bisa Service Account berbeda
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL_PRODUCTION }}' 
 
       - name: 🚀 Deploy to Cloud Run (Production)
         uses: google-github-actions/deploy-cloudrun@v2
