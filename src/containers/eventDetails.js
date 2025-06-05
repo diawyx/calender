@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import moment from 'moment';
+import emailjs from 'emailjs-com';
 import '../css/datetime.css';
 
 var Datetime = require('react-datetime');
@@ -20,10 +21,14 @@ export default class EventDetails extends Component {
                 hexColor: this.props.eventInfo.hexColor ? this.props.eventInfo.hexColor : '#265985',
                 notes: this.props.eventInfo.notes ? this.props.eventInfo.notes : '',
                 file: this.props.eventInfo.file || null
-            }
+            },
+            // tambahan buat form email
+            toEmail: '',
+            message: ''
         };
         this.changeHandler = this.changeHandler.bind(this);
         this.handleFileChange = this.handleFileChange.bind(this);
+        this.sendEmail = this.sendEmail.bind(this);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -71,11 +76,54 @@ export default class EventDetails extends Component {
         }));
     }
 
+    sendEmail(e) {
+        if (e && e.preventDefault) e.preventDefault();
+
+        const templateParams = {
+            to_email: this.state.toEmail,
+            message: this.state.message,
+            event_title: this.state.eventDetail.title
+        };
+
+        emailjs.send(
+            'service_dzf4rqg', // ganti service ID
+            'template_udeia4f', // ganti template ID
+            templateParams,
+            'TiIAUd56-gOt4yPxz' // ganti Public Key kamu
+        )
+        .then((response) => {
+            console.log('SUCCESS!', response.status, response.text);
+            alert('Email berhasil dikirim!');
+            this.setState({ toEmail: '', message: '' });
+        }, (err) => {
+            console.log('FAILED...', err);
+            alert('Gagal kirim email!');
+        });
+    }
+
+    scheduleEmail() {
+        const { start } = this.state.eventDetail;
+        const eventStart = new Date(start).getTime();
+        const now = new Date().getTime();
+        const oneMinuteBefore = eventStart - 60000;
+
+        const timeUntilSend = oneMinuteBefore - now;
+
+        if (timeUntilSend > 0) {
+            setTimeout(() => {
+                this.sendEmail({ preventDefault: () => {} }); // Kirim otomatis
+            }, timeUntilSend);
+            console.log(`Email akan dikirim dalam ${Math.round(timeUntilSend / 1000)} detik`);
+        } else {
+            console.log("Event mulai dalam kurang dari 1 menit atau sudah lewat, tidak menjadwalkan email.");
+        }
+    }
+
     render() {
         return (
             <Modal show={this.state.showModal} onHide={this.props.handleHide}>
                 <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title">Event Details</Modal.Title>
+                    <Modal.Title>Event Details</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <label> Event Name </label>
@@ -164,28 +212,71 @@ export default class EventDetails extends Component {
                             📎 View Attached File
                         </a>
                     )}
+
+                    {/* ======================= FORM EMAIL ========================== */}
+                    <hr />
+                    <h5>Kirim Notifikasi Email</h5>
+                    <form onSubmit={this.sendEmail}>
+                        <input
+                            type="email"
+                            className="form-control"
+                            placeholder="Email Penerima"
+                            value={this.state.toEmail}
+                            onChange={(e) => this.setState({ toEmail: e.target.value })}
+                            required
+                        />
+                        <br />
+                        <textarea
+                            className="form-control"
+                            placeholder="Pesan"
+                            value={this.state.message}
+                            onChange={(e) => this.setState({ message: e.target.value })}
+                            required
+                        />
+                        <br />
+                        <Button type="submit" bsStyle="info">Kirim Email</Button>
+                    </form>
+                    {/* ======================= END FORM EMAIL ========================== */}
+
                 </Modal.Body>
                 <Modal.Footer>
                     {this.props.eventType === 'add' ? (
                         <Button
                             bsStyle="success"
-                            onClick={() => this.props.addEvent(this.state.eventDetail)}
+                            onClick={() => {
+                                this.setState({
+                                    toEmail: this.state.toEmail || 'email@example.com', // ganti email default
+                                    message:
+                                        this.state.message ||
+                                        `Reminder: Event "${this.state.eventDetail.title}" akan segera dimulai.`
+                                }, () => {
+                                    this.props.addEvent(this.state.eventDetail);
+                                    this.scheduleEmail();
+                                });
+                            }}
                         >
                             Add
                         </Button>
                     ) : (
                         <Button
                             bsStyle="warning"
-                            onClick={() => this.props.updateEvent(this.state.eventDetail)}
+                            onClick={() => {
+                                this.setState({
+                                    toEmail: this.state.toEmail || 'email@example.com',
+                                    message:
+                                        this.state.message ||
+                                        `Reminder: Event "${this.state.eventDetail.title}" akan segera dimulai.`
+                                }, () => {
+                                    this.props.updateEvent(this.state.eventDetail);
+                                    this.scheduleEmail();
+                                });
+                            }}
                         >
                             Update
                         </Button>
                     )}
                     {this.props.eventType === 'add' ? null : (
-                        <Button
-                            bsStyle="danger"
-                            onClick={() => this.props.deleteEvent(this.state.eventDetail.id)}
-                        >
+                        <Button bsStyle="danger" onClick={() => this.props.deleteEvent(this.state.eventDetail.id)}>
                             Delete
                         </Button>
                     )}
