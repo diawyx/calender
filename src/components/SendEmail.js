@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import emailjs from 'emailjs-com';
-
+import emailjs from '@emailjs/browser';
 const SendEmail = ({ eventTitle }) => {
   const [toEmail, setToEmail] = useState('');
   const [message, setMessage] = useState('');
