@@ -14,11 +14,6 @@ env:
 jobs:
   # Job 1: Melakukan Scan Kode dengan SonarCloud
   code-scan:
-    - name: ⚙️ Install Dependencies & Run Tests
-        run: |
-          npm ci
-          npm test -- --coverage --watchAll=false
-
     name: Code Quality Scan with SonarCloud
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +22,10 @@ jobs:
         with:
           # fetch-depth: 0 diperlukan oleh SonarCloud untuk analisis yang akurat
           fetch-depth: 0
-
+      - name: ⚙️ Install Dependencies & Run Tests
+        run: |
+          npm ci
+          npm test -- --coverage --watchAll=false
       - name: ☕ Set up JDK
         uses: actions/setup-java@v4
         with:
