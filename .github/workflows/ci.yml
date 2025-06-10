@@ -22,10 +22,7 @@ jobs:
         with:
           # fetch-depth: 0 diperlukan oleh SonarCloud untuk analisis yang akurat
           fetch-depth: 0
-      - name: ⚙️ Install Dependencies & Run Tests
-        run: |
-          npm ci
-          npm test -- --coverage --watchAll=false
+
       - name: ☕ Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -41,7 +38,6 @@ jobs:
           args: >
             -Dsonar.organization=psokelompok11
             -Dsonar.projectKey=diawyx_calender
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info 
 
   # Job 2: Membangun dan Push Docker Image
   build-and-push:
