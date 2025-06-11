@@ -1,22 +1,28 @@
+// jest.config.js
 module.exports = {
-  // Konfigurasi Jest Anda yang sudah ada...
+  // ...konfigurasi Anda yang lain...
 
-  // -- TAMBAHKAN BAGIAN INI --
-  // Aktifkan pengumpulan data cakupan
-  collectCoverage: true,
-
-  // Tentukan folder output untuk laporan
-  coverageDirectory: 'coverage',
-
-  // Tentukan format laporan. 'lcov' sangat penting untuk SonarQube.
-  coverageReporters: ['lcov', 'text', 'html'],
-
-  // Tentukan file mana yang akan dimasukkan dalam laporan cakupan.
+  // Perbarui bagian ini
   collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}', // Mencakup semua file di dalam folder src
-    '!src/index.js',            // Kecualikan file index utama
-    '!src/reportWebVitals.js',  // Kecualikan file lain yang tidak perlu diuji
-    '!src/**/*.test.{js,jsx}',  // Kecualikan semua file tes
-    '!src/store/**'             // Contoh: Kecualikan folder store jika tidak diuji unit
+    // Sertakan semua file .js dan .jsx di dalam folder src
+    "src/**/*.{js,jsx}", 
+    
+    // --- Pengecualian ---
+    // Jangan sertakan file tes dalam laporan cakupan
+    "!src/**/*.test.{js,jsx}",
+    "!src/**/*.spec.{js,jsx}",
+    
+    // Jangan sertakan file setup atau file entry point utama
+    "!src/index.js",
+    "!src/reportWebVitals.js",
+    "!src/setupTests.js",
+
+    // Jangan sertakan folder yang mungkin tidak perlu diuji (jika ada)
+    // Contoh: "!src/apis/**"
   ],
+
+  // Pastikan properti lain tetap ada
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  coverageReporters: ['lcov', 'text', 'html'],
 };

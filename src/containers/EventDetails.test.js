@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import moment from 'moment';
 import emailjs from '@emailjs/browser';
 
-import EventDetails from './containers/eventDetails'; // Komponen yang diuji
+import EventDetails from './eventDetails'; // Komponen yang diuji
 
 // --- MOCKING ---
 
