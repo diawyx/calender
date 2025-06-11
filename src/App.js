@@ -15,7 +15,7 @@ class App extends Component {
         <EventCalendar />
         <footer>
           <hr/>
-          <h5>Developed By: Yasna R. | {(new Date().getFullYear()).toString()} </h5>
+          <h5>Upgraded By: PSO 11 | {(new Date().getFullYear()).toString()} </h5>
           </footer>
       </div>
     );
