@@ -8,8 +8,7 @@ import EventDetails from './containers/eventDetails'; // Komponen yang diuji
 
 // --- MOCKING ---
 
-// FIX: Menggunakan pendekatan auto-mocking Jest yang lebih andal.
-// Jest akan secara otomatis mengganti semua fungsi di dalam modul dengan mock kosong.
+// Menggunakan pendekatan auto-mocking Jest yang lebih andal.
 jest.mock('@emailjs/browser');
 
 // Mock library `react-datetime`
@@ -36,16 +35,19 @@ jest.mock('react-bootstrap', () => {
 
   return {
     Modal: MockModal,
-    Button: ({ onClick, children, ...props }) => <button onClick={onClick} {...props}>{children}</button>,
+    // FIX: Destructure `bsStyle` agar tidak diteruskan ke DOM <button>
+    Button: ({ onClick, children, bsStyle, ...props }) => <button onClick={onClick} {...props}>{children}</button>,
   };
 });
 
 // --- TES UNTUK EVENTDETAILS.JS ---
 
 describe('EventDetails Component', () => {
-    // Mock window.alert() sebelum semua tes berjalan
+    // Mock window APIs sebelum semua tes berjalan
     beforeAll(() => {
         jest.spyOn(window, 'alert').mockImplementation(() => {});
+        // FIX: Tambahkan mock untuk URL.createObjectURL yang tidak ada di JSDOM
+        window.URL.createObjectURL = jest.fn(() => 'blob:http://localhost/mock-url-12345');
     });
 
     // Siapkan props default yang akan digunakan di banyak tes
@@ -78,8 +80,9 @@ describe('EventDetails Component', () => {
     };
 
     // Bersihkan semua mock setelah setiap tes
-    afterEach(() => {
+    beforeEach(() => {
         jest.clearAllMocks();
+        emailjs.send.mockResolvedValue({ status: 200, text: 'OK' });
     });
 
     it('renders the form correctly in "add" mode', () => {
@@ -131,9 +134,6 @@ describe('EventDetails Component', () => {
     });
 
     it('sends an email when email form is submitted', async () => {
-        // FIX: Tentukan implementasi mock di dalam tes untuk memastikan ia mengembalikan Promise
-        emailjs.send.mockResolvedValue({ status: 200, text: 'OK' });
-
         render(<EventDetails {...defaultEditProps} />);
         const emailInput = screen.getByPlaceholderText('Email Penerima');
         const messageInput = screen.getByPlaceholderText('Pesan');
@@ -143,7 +143,6 @@ describe('EventDetails Component', () => {
         fireEvent.change(messageInput, { target: { value: 'Ini adalah pesan tes' } });
         fireEvent.click(sendButton);
 
-        // Tunggu hingga pemanggilan fungsi selesai
         await waitFor(() => {
             expect(emailjs.send).toHaveBeenCalledTimes(1);
         });
@@ -158,5 +157,37 @@ describe('EventDetails Component', () => {
             },
             'TiIAUd56-gOt4yPxz'
         );
+    });
+
+    it('shows an alert on email send failure', async () => {
+        emailjs.send.mockRejectedValue(new Error('Email failed to send'));
+    
+        render(<EventDetails {...defaultEditProps} />);
+        const sendButton = screen.getByRole('button', { name: 'Kirim Email' });
+        fireEvent.click(sendButton);
+    
+        await waitFor(() => {
+            expect(window.alert).toHaveBeenCalledWith('Gagal kirim email!');
+        });
+    });
+
+    it('schedules an email to be sent 1 minute before the event', () => {
+        jest.useFakeTimers();
+    
+        const futureDate = new Date(new Date().getTime() + 5 * 60 * 1000);
+        const editPropsWithFutureDate = {
+            ...defaultEditProps,
+            eventInfo: { ...defaultEditProps.eventInfo, start: futureDate }
+        };
+    
+        render(<EventDetails {...editPropsWithFutureDate} />);
+        fireEvent.click(screen.getByRole('button', { name: /Update/i }));
+    
+        // Cepatkan waktu sebanyak 4 menit lebih untuk memicu timeout
+        jest.advanceTimersByTime(4 * 60 * 1000 + 1000);
+    
+        expect(emailjs.send).toHaveBeenCalledTimes(1);
+        
+        jest.useRealTimers();
     });
 });
