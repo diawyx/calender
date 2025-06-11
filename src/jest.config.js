@@ -4,12 +4,13 @@ module.exports = {
 
   // Perbarui bagian ini
   collectCoverageFrom: [
+    "!src/**/*.test.{js,jsx}",
+
     // Sertakan semua file .js dan .jsx di dalam folder src
     "src/**/*.{js,jsx}", 
     
     // --- Pengecualian ---
     // Jangan sertakan file tes dalam laporan cakupan
-    "!src/**/*.test.{js,jsx}",
     "!src/**/*.spec.{js,jsx}",
     
     // Jangan sertakan file setup atau file entry point utama
