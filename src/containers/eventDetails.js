@@ -215,7 +215,7 @@ export default class EventDetails extends Component {
 
                     {/* ======================= FORM EMAIL ========================== */}
                     <hr />
-                    <h5>Kirim Notifikasi Email</h5>
+                    <h5>Kirim Notifikasi Email by PSO kel 11</h5>
                     <form onSubmit={this.sendEmail}>
                         <input
                             type="email"
