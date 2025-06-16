@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import moment from 'moment';
-import emailjs from 'emailjs-com';
+import emailjs from '@emailjs/browser';
 import '../css/datetime.css';
 
 var Datetime = require('react-datetime');
