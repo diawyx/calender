@@ -6,6 +6,7 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "cors": "^2.8.5",
+    "emailjs-com": "^3.2.0",
     "express": "^5.1.0",
     "localforage": "^1.7.1",
     "moment": "^2.22.1",
@@ -17,9 +18,15 @@
     "react-dom": "^16.3.2",
     "react-pdf": "^3.0.4",
     "react-redux": "^5.0.7",
+<<<<<<< HEAD
     "react-scripts": "5.0.1",
     "redux": "^4.2.1",
     "redux-thunk": "^2.4.2"
+=======
+    "react-scripts": "1.1.4",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0"
+>>>>>>> parent of 474c365 (notifikasi email (oprek))
   },
   "scripts": {
     "start": "react-scripts start",
@@ -38,17 +45,5 @@
   "main": "index.js",
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "license": "ISC"
 }
