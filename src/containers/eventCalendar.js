@@ -1,4 +1,3 @@
-// EventCalendar.js (dark mode)
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import moment from 'moment';
@@ -11,7 +10,7 @@ import * as eventAction from '../store/eventAction';
 import * as types from '../store/eventActionTypes';
 
 BigCalendar.momentLocalizer(moment);
-let allViews = Object.keys(BigCalendar.Views).map(k => BigCalendar.Views[k]);
+let allViews = Object.keys(BigCalendar.Views).map(k => BigCalendar.Views[k])
 
 class EventCalendar extends Component {
     constructor(props) {
@@ -19,9 +18,9 @@ class EventCalendar extends Component {
         this.state = {
             showModal: false,
             eventType: 'add',
-            newIndex: 0,
+            newIndex: 0, 
             eventInfo: {}
-        };
+        }
         this.handleHide = this.handleHide.bind(this);
         this.handleShow = this.handleShow.bind(this);
         this.deleteEvent = this.deleteEvent.bind(this);
@@ -38,32 +37,29 @@ class EventCalendar extends Component {
     }
 
     handleShow(slotInfo, eventType) {
-        const currentIndex = this.props.events.allEvents.length;
-        this.setState({
-            showModal: true,
-            eventType,
-            eventInfo: slotInfo,
-            newIndex: currentIndex
-        });
+        var currentIndex = this.props.events.allEvents.length;
+        this.setState(
+            { showModal: true, eventType: eventType, eventInfo: slotInfo, newIndex: currentIndex }
+        );
     }
 
-    deleteEvent(id) {
+    deleteEvent(id){
         this.props.dispatch({
             type: types.REMOVE_EVENT,
             payload: id
         });
-        this.setState({ showModal: false });
+        this.setState({showModal: false});
     }
 
-    addEvent(obj) {
+    addEvent(obj){
         this.props.dispatch({
             type: types.ADD_EVENT,
             payload: obj
         });
-        this.setState({ showModal: false });
+        this.setState({showModal: false});
     }
 
-    updateEvent(obj) {
+    updateEvent(obj){
         this.props.dispatch({
             type: types.UPDATE_EVENT,
             payload: {
@@ -71,72 +67,70 @@ class EventCalendar extends Component {
                 obj: obj
             }
         });
-        this.setState({ showModal: false });
+        this.setState({showModal: false});
     }
 
-    eventStyle(event, start, end, isSelected) {
-        const bgColor = event.hexColor || '#265985';
+    eventStyle(event, start, end, isSelected){
+        var bgColor = event.hexColor ? event.hexColor : '#265985';
+        var style={
+            'backgroundColor': bgColor,
+            'borderRadius': '5px',
+            'opacity': 1,
+            'color': 'white',
+            'border': '0px',
+            'display': 'block'
+        }
         return {
-            style: {
-                backgroundColor: bgColor,
-                borderRadius: '5px',
-                opacity: 0.9,
-                color: '#ffffff',
-                border: '1px solid #444',
-                display: 'block'
-            }
+            'style': style
         };
     }
 
+    // ✅ Cek reminder 10 menit sebelum event
     checkReminder() {
         const now = new Date();
         this.props.events.allEvents.forEach(event => {
             const startTime = new Date(event.start);
-            const timeDiff = (startTime - now) / 60000;
+            const timeDiff = (startTime - now) / 60000; // dalam menit
 
-            if (timeDiff > 0 && timeDiff <= 10 && !event.notified) {
-                if (Notification.permission === 'granted') {
-                    new Notification("📅 Event Reminder", {
-                        body: `Event "${event.title}" akan dimulai dalam ${Math.ceil(timeDiff)} menit!`,
-                        icon: '/icon.png'
-                    });
+            if (timeDiff > 0 && timeDiff <= 10) {
+                // Cek kalau notifikasi belum dikirim
+                if (!event.notified) {
+                    // Trigger browser notification
+                    if (Notification.permission === 'granted') {
+                        new Notification("📅 Event Reminder", {
+                            body: `Event "${event.title}" akan dimulai dalam ${Math.ceil(timeDiff)} menit!`,
+                            icon: '/icon.png'
+                        });
+                    }
+
+                    // Set flag supaya gak notif terus-terusan
+                    event.notified = true;
                 }
-                event.notified = true;
             }
         });
     }
 
     render() {
+        // ✅ Jalankan pengecekan reminder di setiap render
         this.checkReminder();
 
         return (
-            <div className="bodyContainer" style={{
-                backgroundColor: '#121212',
-                color: '#f0f0f0',
-                minHeight: '100vh',
-                padding: '20px'
-            }}>
-                <div className="well well-sm" style={{
-                    backgroundColor: '#1e1e1e',
-                    border: '1px solid #444',
-                    borderRadius: '8px',
-                    padding: '15px',
-                    marginBottom: '20px'
-                }}>
-                    <h3 className="instruction" style={{ color: '#000000' }}>Calender PSO Kelompok 11</h3>
+            <div className="bodyContainer">
+                <div className="well well-sm">
+                    <h3 className="instruction">Instructions</h3>
+                    <strong>To add an event: </strong> Click on the day you want to add an event or drag up to the day you want to add the event for multiple day event! <br/>
+                    <strong>To update and delete an event:</strong> Click on the event you wish to update or delete!
                 </div>
-
-                <EventDetails
-                    showModal={this.state.showModal}
-                    handleHide={this.handleHide}
-                    eventType={this.state.eventType}
+                <EventDetails 
+                    showModal={this.state.showModal} 
+                    handleHide={this.handleHide} 
+                    eventType={this.state.eventType} 
                     eventInfo={this.state.eventInfo}
-                    newIndex={this.state.newIndex}
-                    deleteEvent={this.deleteEvent}
-                    addEvent={this.addEvent}
+                    newIndex = {this.state.newIndex} 
+                    deleteEvent ={this.deleteEvent} 
+                    addEvent={this.addEvent} 
                     updateEvent={this.updateEvent}
                 />
-
                 <BigCalendar
                     selectable
                     events={this.props.events.allEvents}
@@ -146,14 +140,7 @@ class EventCalendar extends Component {
                     defaultDate={new Date(moment())}
                     onSelectEvent={event => this.handleShow(event, 'edit')}
                     onSelectSlot={slotInfo => this.handleShow(slotInfo, 'add')}
-                    style={{
-                        minHeight: '500px',
-                        backgroundColor: '#1e1e1e',
-                        color: '#f0f0f0',
-                        border: '1px solid #444',
-                        padding: '10px',
-                        borderRadius: '8px'
-                    }}
+                    style={{ minHeight: '500px' }}
                     eventPropGetter={this.eventStyle}
                 />
             </div>
@@ -162,8 +149,10 @@ class EventCalendar extends Component {
 }
 
 function mapStateToProps(state) {
-    const { events } = state;
-    return { events };
+    var { events } = state
+    return {
+        events
+    };
 }
 
 export default connect(mapStateToProps)(EventCalendar);
