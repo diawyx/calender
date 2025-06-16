@@ -7,244 +7,282 @@ import '../css/datetime.css';
 var Datetime = require('react-datetime');
 
 export default class EventDetails extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showModal: props.showModal,
-      attachedFile: null,
-      toEmail: '',
-      message: '',
-      eventDetail: {
-        id: props.eventType === 'add' ? props.newIndex : props.eventInfo.id,
-        title: props.eventInfo?.title || '',
-        start: props.eventInfo?.start || moment(),
-        end: props.eventInfo?.end || moment(),
-        allDay: props.eventInfo?.allDay || false,
-        hexColor: props.eventInfo?.hexColor || '#265985',
-        notes: props.eventInfo?.notes || '',
-        file: props.eventInfo?.file || null
-      }
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      showModal: nextProps.showModal,
-      attachedFile: nextProps.eventInfo.file || null,
-      eventDetail: {
-        id: nextProps.eventType === 'add' ? nextProps.newIndex : nextProps.eventInfo.id,
-        title: nextProps.eventInfo?.title || '',
-        start: new Date(nextProps.eventInfo?.start || moment()),
-        end: new Date(nextProps.eventInfo?.end || moment()),
-        allDay: nextProps.eventInfo?.allDay || false,
-        hexColor: nextProps.eventInfo?.hexColor || '#265985',
-        notes: nextProps.eventInfo?.notes || '',
-        file: nextProps.eventInfo?.file || null
-      }
-    });
-  }
-
-  changeHandler = (e, field) => {
-    const updatedDetail = { ...this.state.eventDetail };
-    if (field === 'start' || field === 'end') {
-      updatedDetail[field] = new Date(moment(e));
-    } else if (field === 'allDay') {
-      updatedDetail[field] = e.target.checked;
-    } else {
-      updatedDetail[field] = e.target.value;
+    constructor(props) {
+        super(props);
+        this.state = {
+            showModal: this.props.showModal,
+            attachedFile: null,
+            eventDetail: {
+                id: this.props.eventType === 'add' ? this.props.newIndex : this.props.eventInfo.id,
+                title: this.props.eventInfo && this.props.eventInfo.title ? this.props.eventInfo.title : '',
+                start: this.props.eventInfo && this.props.eventInfo.start ? this.props.eventInfo.start : moment(),
+                end: this.props.eventInfo && this.props.eventInfo.end ? this.props.eventInfo.end : moment(),
+                allDay: this.props.eventInfo.allDay ? true : false,
+                hexColor: this.props.eventInfo.hexColor ? this.props.eventInfo.hexColor : '#265985',
+                notes: this.props.eventInfo.notes ? this.props.eventInfo.notes : '',
+                file: this.props.eventInfo.file || null
+            },
+            // tambahan buat form email
+            toEmail: '',
+            message: ''
+        };
+        this.changeHandler = this.changeHandler.bind(this);
+        this.handleFileChange = this.handleFileChange.bind(this);
+        this.sendEmail = this.sendEmail.bind(this);
     }
-    this.setState({ eventDetail: updatedDetail });
-  };
 
-  handleFileChange = (e) => {
-    const file = e.target.files[0];
-    this.setState(prev => ({
-      attachedFile: file,
-      eventDetail: { ...prev.eventDetail, file }
-    }));
-  };
-
-  sendEmail = (e) => {
-    if (e?.preventDefault) e.preventDefault();
-
-    const templateParams = {
-      to_email: this.state.toEmail,
-      message: this.state.message,
-      event_title: this.state.eventDetail.title
-    };
-
-    emailjs.send(
-      'service_dzf4rqg', // ganti dengan Service ID kamu
-      'template_udeia4f', // ganti dengan Template ID kamu
-      templateParams,
-      'TiIAUd56-gOt4yPxz' // ganti dengan Public Key kamu
-    ).then((res) => {
-      console.log('Email sent!', res.status, res.text);
-      alert('📬 Email berhasil dikirim!');
-      this.setState({ toEmail: '', message: '' });
-    }).catch((err) => {
-      console.error('Email failed...', err);
-      alert('❌ Gagal kirim email!');
-    });
-  };
-
-  scheduleEmail = () => {
-    const start = new Date(this.state.eventDetail.start).getTime();
-    const now = new Date().getTime();
-    const delay = start - now - 60000;
-
-    if (delay > 0) {
-      setTimeout(() => {
-        this.sendEmail({ preventDefault: () => {} });
-      }, delay);
-      console.log(`Email akan dikirim dalam ${Math.round(delay / 1000)} detik`);
-    } else {
-      console.log("Event terlalu dekat atau sudah lewat. Email tidak dijadwalkan.");
+    componentWillReceiveProps(nextProps) {
+        this.setState({
+            showModal: nextProps.showModal,
+            attachedFile: nextProps.eventInfo.file || null,
+            eventDetail: {
+                id: nextProps.eventType === 'add' ? nextProps.newIndex : nextProps.eventInfo.id,
+                title: nextProps.eventInfo && nextProps.eventInfo.title ? nextProps.eventInfo.title : '',
+                start: new Date(nextProps.eventInfo && nextProps.eventInfo.start ? nextProps.eventInfo.start : moment()),
+                end: new Date(nextProps.eventInfo && nextProps.eventInfo.end ? nextProps.eventInfo.end : moment()),
+                allDay: nextProps.eventInfo.allDay ? true : false,
+                hexColor: nextProps.eventInfo.hexColor ? nextProps.eventInfo.hexColor : '#265985',
+                notes: nextProps.eventInfo.notes ? nextProps.eventInfo.notes : '',
+                file: nextProps.eventInfo.file || null
+            }
+        });
     }
-  };
 
-  render() {
-    const { eventDetail, attachedFile, toEmail, message } = this.state;
-    const { showModal } = this.state;
-    const { eventType, handleHide, addEvent, updateEvent, deleteEvent } = this.props;
+    changeHandler(e, ref) {
+        var eventDetail = this.state.eventDetail;
+        var val = '';
+        if (ref !== "allDay") {
+            if (ref === "start" || ref === "end") {
+                val = new Date(moment(e));
+            } else {
+                val = e.target.value;
+            }
+        } else {
+            val = e.target.checked;
+        }
 
-    return (
-      <Modal show={showModal} onHide={handleHide} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>📅 Event Details</Modal.Title>
-        </Modal.Header>
+        eventDetail[ref] = val;
+        this.setState({ eventDetail });
+    }
 
-        <Modal.Body>
-          <label>📌 Event Name</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Judul Event"
-            value={eventDetail.title}
-            onChange={(e) => this.changeHandler(e, "title")}
-          />
+    handleFileChange(e) {
+        const file = e.target.files[0];
+        this.setState(prevState => ({
+            attachedFile: file,
+            eventDetail: {
+                ...prevState.eventDetail,
+                file: file
+            }
+        }));
+    }
 
-          <label>🕒 Start Date</label>
-          <Datetime
-            value={eventDetail.start}
-            dateFormat="MM-DD-YYYY"
-            timeFormat={!eventDetail.allDay}
-            onChange={(e) => this.changeHandler(e, "start")}
-          />
+    sendEmail(e) {
+        if (e && e.preventDefault) e.preventDefault();
 
-          <label>🕔 End Date</label>
-          <Datetime
-            value={eventDetail.end}
-            dateFormat="MM-DD-YYYY"
-            timeFormat={!eventDetail.allDay}
-            onChange={(e) => this.changeHandler(e, "end")}
-          />
+        const templateParams = {
+            to_email: this.state.toEmail,
+            message: this.state.message,
+            event_title: this.state.eventDetail.title
+        };
 
-          <label>📝 Notes</label>
-          <textarea
-            className="form-control"
-            placeholder="Catatan tambahan..."
-            value={eventDetail.notes}
-            onChange={(e) => this.changeHandler(e, "notes")}
-          />
+        emailjs.send(
+            'service_dzf4rqg', // ganti service ID
+            'template_udeia4f', // ganti template ID
+            templateParams,
+            'TiIAUd56-gOt4yPxz' // ganti Public Key kamu
+        )
+        .then((response) => {
+            console.log('SUCCESS!', response.status, response.text);
+            alert('Email berhasil dikirim!');
+            this.setState({ toEmail: '', message: '' });
+        }, (err) => {
+            console.log('FAILED...', err);
+            alert('Gagal kirim email!');
+        });
+    }
 
-          <div style={{ marginTop: '10px' }}>
-            <label>🎨 Warna Event</label>
-            <input
-              type="color"
-              value={eventDetail.hexColor}
-              onChange={(e) => this.changeHandler(e, "hexColor")}
-              style={{ marginLeft: '10px' }}
-            />
-          </div>
+    scheduleEmail() {
+        const { start } = this.state.eventDetail;
+        const eventStart = new Date(start).getTime();
+        const now = new Date().getTime();
+        const oneMinuteBefore = eventStart - 60000;
 
-          <div style={{ marginTop: '10px' }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={eventDetail.allDay}
-                onChange={(e) => this.changeHandler(e, "allDay")}
-              /> All Day
-            </label>
-          </div>
+        const timeUntilSend = oneMinuteBefore - now;
 
-          <br />
-          <label>📎 Upload File</label>
-          <input
-            type="file"
-            className="form-control"
-            onChange={this.handleFileChange}
-          />
-          {attachedFile && <p style={{ fontSize: '0.85rem' }}>Attached: {attachedFile.name}</p>}
-          {eventDetail.file && typeof eventDetail.file !== 'string' && (
-            <a
-              href={URL.createObjectURL(eventDetail.file)}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: '0.85rem', display: 'inline-block', marginTop: '5px' }}
-            >
-              📄 View File
-            </a>
-          )}
+        if (timeUntilSend > 0) {
+            setTimeout(() => {
+                this.sendEmail({ preventDefault: () => {} }); // Kirim otomatis
+            }, timeUntilSend);
+            console.log(`Email akan dikirim dalam ${Math.round(timeUntilSend / 1000)} detik`);
+        } else {
+            console.log("Event mulai dalam kurang dari 1 menit atau sudah lewat, tidak menjadwalkan email.");
+        }
+    }
 
-          <hr />
-          <h5>✉️ Kirim Notifikasi Email</h5>
-          <form onSubmit={this.sendEmail}>
-            <input
-              type="email"
-              className="form-control"
-              placeholder="Email Tujuan"
-              value={toEmail}
-              onChange={(e) => this.setState({ toEmail: e.target.value })}
-              required
-            />
-            <br />
-            <textarea
-              className="form-control"
-              placeholder="Isi Pesan"
-              value={message}
-              onChange={(e) => this.setState({ message: e.target.value })}
-              required
-            />
-            <br />
-            <Button type="submit" variant="info">Kirim Email Sekarang</Button>
-          </form>
-        </Modal.Body>
+    render() {
+        return (
+            <Modal show={this.state.showModal} onHide={this.props.handleHide}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Event Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <label> Event Name </label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter the Event Name"
+                        value={this.state.eventDetail.title}
+                        onChange={(e) => this.changeHandler(e, "title")}
+                    />
 
-        <Modal.Footer>
-          {eventType === 'add' ? (
-            <Button
-              variant="success"
-              onClick={() => {
-                this.setState({
-                  toEmail: toEmail || 'email@example.com',
-                  message: message || `Reminder: Event "${eventDetail.title}" akan segera dimulai.`
-                }, () => {
-                  addEvent(eventDetail);
-                  this.scheduleEmail();
-                });
-              }}
-            >Add</Button>
-          ) : (
-            <>
-              <Button
-                variant="warning"
-                onClick={() => {
-                  this.setState({
-                    toEmail: toEmail || 'email@example.com',
-                    message: message || `Reminder: Event "${eventDetail.title}" akan segera dimulai.`
-                  }, () => {
-                    updateEvent(eventDetail);
-                    this.scheduleEmail();
-                  });
-                }}
-              >Update</Button>
-              <Button variant="danger" onClick={() => deleteEvent(eventDetail.id)}>Delete</Button>
-            </>
-          )}
-          <Button variant="secondary" onClick={handleHide}>Close</Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  }
+                    <label> Start Date </label>
+                    {this.state.eventDetail.allDay ? (
+                        <Datetime
+                            value={this.state.eventDetail.start}
+                            dateFormat="MM-DD-YYYY"
+                            timeFormat={false}
+                            onChange={(e) => this.changeHandler(e, "start")}
+                        />
+                    ) : (
+                        <Datetime
+                            value={this.state.eventDetail.start}
+                            onChange={(e) => this.changeHandler(e, "start")}
+                        />
+                    )}
+
+                    <label> End Date </label>
+                    {this.state.eventDetail.allDay ? (
+                        <Datetime
+                            value={this.state.eventDetail.end}
+                            dateFormat="MM-DD-YYYY"
+                            timeFormat={false}
+                            onChange={(e) => this.changeHandler(e, "end")}
+                        />
+                    ) : (
+                        <Datetime
+                            value={this.state.eventDetail.end}
+                            onChange={(e) => this.changeHandler(e, "end")}
+                        />
+                    )}
+
+                    <label> Event Notes </label>
+                    <textarea
+                        className="form-control"
+                        placeholder="Event Notes"
+                        value={this.state.eventDetail.notes}
+                        onChange={(e) => this.changeHandler(e, "notes")}
+                    />
+
+                    <label> Event Color </label>
+                    <input
+                        type="color"
+                        value={this.state.eventDetail.hexColor}
+                        onChange={(e) => this.changeHandler(e, "hexColor")}
+                        style={{ marginRight: '20px', marginLeft: '5px' }}
+                    />
+
+                    <input
+                        type="checkBox"
+                        name="all_Day"
+                        value={this.state.eventDetail.id}
+                        checked={this.state.eventDetail.allDay}
+                        onChange={(e) => this.changeHandler(e, "allDay")}
+                    />
+                    <label> All Day </label>
+
+                    <br /><br />
+                    <label>Attach File</label>
+                    <input
+                        type="file"
+                        className="form-control"
+                        onChange={this.handleFileChange}
+                    />
+                    {this.state.attachedFile && (
+                        <p style={{ fontSize: '0.85rem' }}>
+                            Attached: {this.state.attachedFile.name}
+                        </p>
+                    )}
+                    {this.state.eventDetail.file && typeof this.state.eventDetail.file !== 'string' && (
+                        <a
+                            href={URL.createObjectURL(this.state.eventDetail.file)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.85rem', display: 'inline-block', marginTop: '5px' }}
+                        >
+                            📎 View Attached File
+                        </a>
+                    )}
+
+                    {/* ======================= FORM EMAIL ========================== */}
+                    <hr />
+                    <h5>Kirim Notifikasi Email by PSO kel 11</h5>
+                    <form onSubmit={this.sendEmail}>
+                        <input
+                            type="email"
+                            className="form-control"
+                            placeholder="Email Penerima"
+                            value={this.state.toEmail}
+                            onChange={(e) => this.setState({ toEmail: e.target.value })}
+                            required
+                        />
+                        <br />
+                        <textarea
+                            className="form-control"
+                            placeholder="Pesan"
+                            value={this.state.message}
+                            onChange={(e) => this.setState({ message: e.target.value })}
+                            required
+                        />
+                        <br />
+                        <Button type="submit" bsStyle="info">Kirim Email</Button>
+                    </form>
+                    {/* ======================= END FORM EMAIL ========================== */}
+
+                </Modal.Body>
+                <Modal.Footer>
+                    {this.props.eventType === 'add' ? (
+                        <Button
+                            bsStyle="success"
+                            onClick={() => {
+                                this.setState({
+                                    toEmail: this.state.toEmail || 'email@example.com', // ganti email default
+                                    message:
+                                        this.state.message ||
+                                        `Reminder: Event "${this.state.eventDetail.title}" akan segera dimulai.`
+                                }, () => {
+                                    this.props.addEvent(this.state.eventDetail);
+                                    this.scheduleEmail();
+                                });
+                            }}
+                        >
+                            Add
+                        </Button>
+                    ) : (
+                        <Button
+                            bsStyle="warning"
+                            onClick={() => {
+                                this.setState({
+                                    toEmail: this.state.toEmail || 'email@example.com',
+                                    message:
+                                        this.state.message ||
+                                        `Reminder: Event "${this.state.eventDetail.title}" akan segera dimulai.`
+                                }, () => {
+                                    this.props.updateEvent(this.state.eventDetail);
+                                    this.scheduleEmail();
+                                });
+                            }}
+                        >
+                            Update
+                        </Button>
+                    )}
+                    {this.props.eventType === 'add' ? null : (
+                        <Button bsStyle="danger" onClick={() => this.props.deleteEvent(this.state.eventDetail.id)}>
+                            Delete
+                        </Button>
+                    )}
+                    <Button onClick={this.props.handleHide}>Close</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    }
 }
