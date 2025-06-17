@@ -162,6 +162,15 @@ Throughout the implementation of this CI/CD pipeline, several technical challeng
 - **Challenge:** A deployed URL returned Error: Forbidden.
 - **Solution:** The Cloud Run service was deployed with default private access. We resolved this by adding the --allow-unauthenticated flag to the deploy-cloudrun step in the workflow.
 
+- **Challenge:** The CI/CD pipeline failed at the testing stage after a new feature was added. The feature caused existing unit tests to error out, which halted the deployment process.
+- **Solution:** This issue was resolved by treating the failed test as a critical bug, not an obstacle, and following these steps:
+        1. Analyzing the CI/CD logs to identify which specific test failed and its corresponding error message.
+        2. Identifying the root cause by running the test suite locally:
+         - If the new feature broke existing functionality, then the new feature's code was fixed.
+         - If the new feature intentionally changed the system's behavior, then the existing unit test was updated (refactored) to match the new, expected behavior.
+        3. Adding a new unit test to specifically cover the functionality of the newly added feature.
+        4. Once all tests (both old and new) passed locally, the fix was committed to the repository to trigger the CI/CD pipeline again.
+
 ## 6. Future Work
 The implemented CI/CD pipeline successfully automates the build, test, and deployment lifecycle. Future work will focus on:
 
