@@ -16,97 +16,239 @@
 
 .App-title {
   font-size: 1.5em;
-  
 }
 
 .App-intro {
   font-size: large;
 }
 
-.bodyContainer{
-  margin: 70px;
+.bodyContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.rbc-toolbar-label{
-  color:brown;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.header h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.clock {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 48px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+
+.light-mode .clock {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 2px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.dark-mode .clock {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff;
+  border: 2px solid #333;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.mode-toggle {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.light-mode {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.light-mode .mode-toggle {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+.dark-mode .mode-toggle {
+  background-color: #f5f5f5;
+  color: #121212;
+}
+
+/* Well Box */
+.well {
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  background-color: #fff;
+}
+
+
+.dark-mode .well {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+.dark-mode .well p,
+.light-mode .well p {
+  margin: 0;
+}
+
+.dark-mode .well h3 {
+  color: #fff;
+  color: black;
+}
+
+.light-mode .well h3 {
+  color: #333;
+}
+
+/* Big Calendar Styling */
+.rbc-toolbar-label {
+  color: brown;
+  font-weight: bolder;
+  font-size: 20px;
+  font-family: fantasy;
+}
+/* LIGHT MODE */
+.light-mode .rbc-toolbar-label {
+  color: rgb(0, 0, 0);
   font-weight: bolder;
   font-size: 20px;
   font-family: fantasy;
 }
 
-h1, .instruction{
+/* DARK MODE */
+.dark-mode .rbc-toolbar-label {
+  color: #ffffff; /* Bisa diganti sesuai selera, misal gold/kuning lembut */
+  font-weight: bolder;
+  font-size: 20px;
   font-family: fantasy;
 }
 
-.modal{ display:block; }
 
-.rbc-toolbar span:first-child button:first-child {
- background-color:#28a745;
- color: white;
- font-weight: bold;
+h1, .instruction {
+  font-family: fantasy;
 }
 
-.rbc-toolbar span:first-child button:nth-child(2)  {
+.modal {
+  display: block;
+}
+
+.rbc-toolbar {
+  flex-wrap: wrap-reverse;
+}
+
+.rbc-toolbar span:first-child button:first-child {
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+}
+
+.rbc-toolbar span:first-child button:nth-child(2),
+.rbc-toolbar span:first-child button:nth-child(3) {
   text-indent: -9999px;
-  line-height: 0; 
+  line-height: 0;
   margin-left: 5px;
 }
 
-.rbc-toolbar span:first-child button:nth-child(2)::after  {
+.rbc-toolbar span:first-child button:nth-child(2)::after {
   content: '◀';
   text-indent: 0;
   display: block;
-  line-height: initial; 
+  line-height: initial;
   font-size: 13px;
-  
 }
 
-.rbc-toolbar span:first-child button:nth-child(3)  {
-  text-indent: -9999px;
-  line-height: 0; 
-}
-
-.rbc-toolbar span:first-child button:nth-child(3)::after  {
+.rbc-toolbar span:first-child button:nth-child(3)::after {
   content: '▶';
   text-indent: 0;
   display: block;
-  line-height: initial; 
+  line-height: initial;
   font-size: 13px;
 }
 
-.rbc-active{
+.rbc-active {
   background-color: #007bff !important;
   color: white !important;
 }
 
-.rbc-header{
-  background-color: black !important;
-  color: white !important;
+.rbc-header {
+  background-color: rgb(255, 255, 255);
+  color: white;
   padding-top: 5px !important;
   padding-bottom: 5px !important;
   border-radius: 5px;
 }
-
-.rbc-toolbar{
-  flex-wrap: wrap-reverse;
+.dark-mode .rbc-header{
+  background-color: #fff;
+  color: black;
 }
 
-.rbc-day-bg + .rbc-day-bg, .rbc-month-row + .rbc-month-row {
-  border: none !important;
+.light-mode .rbc-header{
+  background-color: #000000;
+  color: rgb(255, 255, 255);
 }
 
-.rbc-off-range-bg{
+.rbc-off-range-bg {
   border-radius: 10px;
   margin-left: 1px;
 }
 
-.rbc-month-view{
+.rbc-month-view {
   border-radius: 10px;
+  color: rgb(0, 0, 0);
 }
 
-.rbc-btn-group{
+.dark-mode .rbc-month-view{
+  color: rgb(72, 255, 0);
+}
+
+.rbc-btn-group {
   white-space: pre-wrap !important;
   margin-bottom: 10px;
+}
+
+/* Responsive */
+@media screen and (min-width: 1080px) {
+  .bodyContainer {
+    width: 1050px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .bodyContainer {
+    width: 100%;
+    padding: 0px;
+    margin: 0;
+  }
 }
 
 @keyframes App-logo-spin {
@@ -114,16 +256,93 @@ h1, .instruction{
   to { transform: rotate(360deg); }
 }
 
-@media screen and (min-width: 1080px){
-  .bodyContainer{
-    width: 1050px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+/* Global Reset */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-@media screen and (max-width: 500px){
-  .bodyContainer{
-    margin: 2%;
-  }
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.marquee p {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 15s linear infinite;
+  font-size: 16px;
+  margin: 0;
+  color: brown;
+}
+
+@keyframes marquee {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(-100%, 0); }
+}
+
+/* Toggle Switch CSS */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin: 10px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* Checked (Dark Mode) */
+.switch input:checked + .slider {
+  background-color: #2196F3;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Optional: sun/moon icon inside switch */
+.switch input:checked + .slider::after {
+  content: "🌙";
+  position: absolute;
+  left: 10px;
+  top: 5px;
+}
+
+.switch input:not(:checked) + .slider::after {
+  content: "☀️";
+  position: absolute;
+  left: 10px;
+  top: 5px;
 }

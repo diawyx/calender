@@ -51,7 +51,7 @@ The pipeline automates the entire process from code analysis to building a conta
 | | Jest | A JavaScript testing framework used to run unit and integration tests as part of the CI pipeline. |
 | | SonarCloud | Used for static code analysis (SAST) to maintain code quality and detect bugs or vulnerabilities. |
 | | Docker Hub | Acts as the registry for storing and distributing the containerized application (Docker image). |
-| | Google Cloud Run | The serverless platform on GCP used for deploying and running the containerized application. |
+| | Google Cloud Run | The serverless platform on GCP used for deploying, running, and monitoring the containerized application. |
 
 
 ## 3. Key Features

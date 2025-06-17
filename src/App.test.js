@@ -17,7 +17,7 @@ import EventCalendar from './containers/eventCalendar';
 jest.mock('./containers/eventCalendar', () => () => <div>EventCalendarMock</div>);
 
 
-// --- HELPER UNTUK RENDER DENGAN REDUX ---
+// --- FUNGSI BANTU UNTUK RENDER DENGAN REDUX ---
 const renderWithProviders = (
   ui,
   {
