@@ -19,29 +19,17 @@ class EventCalendar extends Component {
             showModal: false,
             eventType: 'add',
             newIndex: 0, 
-            eventInfo: {},
-            darkMode: true,  
-            time: new Date()
+            eventInfo: {}
         }
         this.handleHide = this.handleHide.bind(this);
         this.handleShow = this.handleShow.bind(this);
         this.deleteEvent = this.deleteEvent.bind(this);
         this.addEvent = this.addEvent.bind(this);
         this.updateEvent = this.updateEvent.bind(this);
-        this.toggleMode = this.toggleMode.bind(this);
     }
 
     componentWillMount() {
         this.props.dispatch(eventAction.GetInitialEvents());
-    }
-
-    componentDidMount() {
-        // ✅ update jam tiap detik
-        this.timer = setInterval(() => this.setState({ time: new Date() }), 1000);
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.timer);
     }
 
     handleHide() {
@@ -74,77 +62,75 @@ class EventCalendar extends Component {
     updateEvent(obj){
         this.props.dispatch({
             type: types.UPDATE_EVENT,
-            payload: { id: obj.id, obj: obj }
+            payload: {
+                id: obj.id,
+                obj: obj
+            }
         });
         this.setState({showModal: false});
     }
 
-    eventStyle(event){
-        var bgColor = event.hexColor ? event.hexColor : '#4caf50';
+    eventStyle(event, start, end, isSelected){
+        var bgColor = event.hexColor ? event.hexColor : '#265985';
+        var style={
+            'backgroundColor': bgColor,
+            'borderRadius': '5px',
+            'opacity': 1,
+            'color': 'white',
+            'border': '0px',
+            'display': 'block'
+        }
         return {
-            style: {
-                backgroundColor: bgColor,
-                borderRadius: '8px',
-                opacity: 1,
-                color: 'white',
-                border: '0px',
-                display: 'block'
-            }
+            'style': style
         };
     }
 
+    // ✅ Cek reminder 10 menit sebelum event
     checkReminder() {
         const now = new Date();
         this.props.events.allEvents.forEach(event => {
             const startTime = new Date(event.start);
-            const timeDiff = (startTime - now) / 60000;
-            if (timeDiff > 0 && timeDiff <= 10 && !event.notified) {
-                if (Notification.permission === 'granted') {
-                    new Notification("📅 Event Reminder", {
-                        body: `Event "${event.title}" dimulai dalam ${Math.ceil(timeDiff)} menit!`,
-                        icon: '/icon.png'
-                    });
+            const timeDiff = (startTime - now) / 60000; // dalam menit
+
+            if (timeDiff > 0 && timeDiff <= 10) {
+                // Cek kalau notifikasi belum dikirim
+                if (!event.notified) {
+                    // Trigger browser notification
+                    if (Notification.permission === 'granted') {
+                        new Notification("📅 Event Reminder", {
+                            body: `Event "${event.title}" akan dimulai dalam ${Math.ceil(timeDiff)} menit!`,
+                            icon: '/icon.png'
+                        });
+                    }
+
+                    // Set flag supaya gak notif terus-terusan
+                    event.notified = true;
                 }
-                event.notified = true;
             }
         });
     }
 
-    toggleMode() {
-        this.setState(prev => ({ darkMode: !prev.darkMode }));
-    }
-
     render() {
+        // ✅ Jalankan pengecekan reminder di setiap render
         this.checkReminder();
-        const appClass = this.state.darkMode ? 'dark-mode' : 'light-mode';
 
         return (
-            <div className={`bodyContainer ${appClass}`}>
-                <div className="header">
-                    <div className="clock">{this.state.time.toLocaleTimeString()}</div>
-                    <label className="switch">
-  <input
-    type="checkbox"
-    checked={this.state.darkMode}
-    onChange={this.toggleMode}
-  />
-  <span className="slider round"></span>
-</label>
-
+            <div className="bodyContainer">
+                <div className="well well-sm">
+                    <h3 className="instruction">Instructions</h3>
+                    <strong>To add an event: </strong> Click on the day you want to add an event or drag up to the day you want to add the event for multiple day event! <br/>
+                    <strong>To update and delete an event:</strong> Click on the event you wish to update or delete!
                 </div>
-
-
                 <EventDetails 
                     showModal={this.state.showModal} 
                     handleHide={this.handleHide} 
                     eventType={this.state.eventType} 
                     eventInfo={this.state.eventInfo}
-                    newIndex={this.state.newIndex} 
-                    deleteEvent={this.deleteEvent} 
+                    newIndex = {this.state.newIndex} 
+                    deleteEvent ={this.deleteEvent} 
                     addEvent={this.addEvent} 
                     updateEvent={this.updateEvent}
                 />
-
                 <BigCalendar
                     selectable
                     events={this.props.events.allEvents}
@@ -154,7 +140,7 @@ class EventCalendar extends Component {
                     defaultDate={new Date(moment())}
                     onSelectEvent={event => this.handleShow(event, 'edit')}
                     onSelectSlot={slotInfo => this.handleShow(slotInfo, 'add')}
-                    style={{ minHeight: '600px' }}
+                    style={{ minHeight: '500px' }}
                     eventPropGetter={this.eventStyle}
                 />
             </div>
@@ -163,7 +149,10 @@ class EventCalendar extends Component {
 }
 
 function mapStateToProps(state) {
-    return { events: state.events };
+    var { events } = state
+    return {
+        events
+    };
 }
 
 export default connect(mapStateToProps)(EventCalendar);
