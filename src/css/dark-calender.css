@@ -1,0 +1,85 @@
+/* Body Container */
+.bodyContainer {
+  background-color: #121212;
+  padding: 24px;
+  min-height: 100vh;
+  color: #e0e0e0;
+}
+
+/* Instruction Box */
+.instructionBox {
+  background-color: #1e1e1e;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #333;
+  border-radius: 10px;
+}
+
+.instructionBox h3 {
+  margin-top: 0;
+  color: #fff;
+}
+
+/* Calendar base */
+.rbc-calendar {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+/* Toolbar */
+.rbc-toolbar {
+  background-color: #1e1e1e;
+  border: none;
+  margin-bottom: 16px;
+}
+
+.rbc-toolbar button {
+  color: #e0e0e0;
+  background: transparent;
+  border: 1px solid #333;
+}
+
+.rbc-toolbar button:hover,
+.rbc-toolbar button.rbc-active {
+  background-color: #333;
+}
+
+/* Headers */
+.rbc-header {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333;
+}
+
+/* Time slots */
+.rbc-time-view {
+  border-color: #333;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid #333;
+}
+
+/* Today highlight */
+.rbc-today {
+  background-color: #333 !important;
+}
+
+/* Selected slot */
+.rbc-selected-cell {
+  background-color: #444 !important;
+}
+
+/* Events style */
+.rbc-event {
+  border: none;
+}
+
+.rbc-event-content {
+  color: #ffffff;
+}
+
+/* Modal backdrop custom if needed */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.8);
+}
