@@ -162,7 +162,10 @@ Throughout the implementation of this CI/CD pipeline, several technical challeng
 - **Challenge:** A deployed URL returned Error: Forbidden.
 - **Solution:** The Cloud Run service was deployed with default private access. We resolved this by adding the --allow-unauthenticated flag to the deploy-cloudrun step in the workflow.
 
+### 5.4. Testing Failed 
 - **Challenge:** The CI/CD pipeline failed at the testing stage after a new feature was added. The feature caused existing unit tests to error out, which halted the deployment process.
+![Challenge](readme-assets/Trouble-5.4-1.png)
+
 - **Solution:** This issue was resolved by treating the failed test as a critical bug, not an obstacle, and following these steps:
         1. Analyzing the CI/CD logs to identify which specific test failed and its corresponding error message.
         2. Identifying the root cause by running the test suite locally:
