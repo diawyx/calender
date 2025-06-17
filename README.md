@@ -1,5 +1,5 @@
 # 📅 Calender - A React Web Application with CI/CD
-![DevOps Pipeline Architecture](readme-assets/calender.png)
+![DevOps Pipeline Architecture](readme-assets/light-mode.jpg)
 A full-stack event calendar application built with the MERN stack (MongoDB, Express.js, React.js, Node.js) and deployed via a comprehensive CI/CD pipeline to Google Cloud Platform.
 
 This application utilizes <a href="https://github.com/intljusticemission/react-big-calendar"> react-big-calendar </a> and 
@@ -59,6 +59,7 @@ The application currently supports the following core features:
 * 🗓️ **Event Calendar**: A primary interface for viewing, creating, and managing events.
 * 📤 **File Upload System**: An API endpoint (`/upload`) for uploading files, managed by the Node.js backend.
 * 🔔 **Notification System**: A feature to provide real-time notifications to users within the website.
+* 🌙 **Dark Mode**: This feature allows user to operate the app better in a low-light condition.
 
 
 ## 4. The CI/CD Pipeline
