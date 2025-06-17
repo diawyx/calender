@@ -2,41 +2,6 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  background-color: black;
-}
-
-.light-mode {
-  background-color: #f8f9fa;
-  color: #212529;
-}
-
-.dark-mode {
-  background-color: #1c1c1c;
-  color: #f8f9fa;
-}
-
-.dark-mode .rbc-calendar {
-  background-color: #2c2c2c;
-  color: #f8f9fa;
-}
-
-.dark-mode .rbc-event {
-  background-color: #4a4a4a;
-  border: none;
-}
-
-.dark-mode .rbc-toolbar button {
-  color: #f8f9fa;
-}
-
-.dark-mode .well {
-  background-color: #343a40;
-  color: #f8f9fa;
-  border: none;
-}
-
-.dark-mode h3 {
-  color: #f8f9fa;
 }
 
 
