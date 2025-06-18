@@ -11,18 +11,17 @@ export default class EventDetails extends Component {
         super(props);
         this.state = {
             showModal: this.props.showModal,
-            attachedFile: null,
+            attachedFile: this.props.eventInfo.file || null,
             eventDetail: {
                 id: this.props.eventType === 'add' ? this.props.newIndex : this.props.eventInfo.id,
-                title: this.props.eventInfo && this.props.eventInfo.title ? this.props.eventInfo.title : '',
-                start: this.props.eventInfo && this.props.eventInfo.start ? this.props.eventInfo.start : moment(),
-                end: this.props.eventInfo && this.props.eventInfo.end ? this.props.eventInfo.end : moment(),
-                allDay: this.props.eventInfo.allDay ? true : false,
-                hexColor: this.props.eventInfo.hexColor ? this.props.eventInfo.hexColor : '#265985',
-                notes: this.props.eventInfo.notes ? this.props.eventInfo.notes : '',
-                file: this.props.eventInfo.file || null
+                title: this.props.eventInfo?.title || '',
+                start: this.props.eventInfo?.start || moment(),
+                end: this.props.eventInfo?.end || moment(),
+                allDay: !!this.props.eventInfo.allDay,
+                hexColor: this.props.eventInfo?.hexColor || '#265985',
+                notes: this.props.eventInfo?.notes || '',
+                file: this.props.eventInfo?.file || null
             },
-            // tambahan buat form email
             toEmail: '',
             message: ''
         };
@@ -31,26 +30,33 @@ export default class EventDetails extends Component {
         this.sendEmail = this.sendEmail.bind(this);
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setState({
-            showModal: nextProps.showModal,
-            attachedFile: nextProps.eventInfo.file || null,
-            eventDetail: {
-                id: nextProps.eventType === 'add' ? nextProps.newIndex : nextProps.eventInfo.id,
-                title: nextProps.eventInfo && nextProps.eventInfo.title ? nextProps.eventInfo.title : '',
-                start: new Date(nextProps.eventInfo && nextProps.eventInfo.start ? nextProps.eventInfo.start : moment()),
-                end: new Date(nextProps.eventInfo && nextProps.eventInfo.end ? nextProps.eventInfo.end : moment()),
-                allDay: nextProps.eventInfo.allDay ? true : false,
-                hexColor: nextProps.eventInfo.hexColor ? nextProps.eventInfo.hexColor : '#265985',
-                notes: nextProps.eventInfo.notes ? nextProps.eventInfo.notes : '',
-                file: nextProps.eventInfo.file || null
-            }
-        });
+    componentDidUpdate(prevProps) {
+        if (
+            prevProps.eventInfo.id !== this.props.eventInfo.id ||
+            prevProps.eventType !== this.props.eventType ||
+            prevProps.showModal !== this.props.showModal
+        ) {
+            this.setState({
+                showModal: this.props.showModal,
+                attachedFile: this.props.eventInfo.file || null,
+                eventDetail: {
+                    id: this.props.eventType === 'add' ? this.props.newIndex : this.props.eventInfo.id,
+                    title: this.props.eventInfo?.title || '',
+                    start: this.props.eventInfo?.start || moment(),
+                    end: this.props.eventInfo?.end || moment(),
+                    allDay: !!this.props.eventInfo.allDay,
+                    hexColor: this.props.eventInfo?.hexColor || '#265985',
+                    notes: this.props.eventInfo?.notes || '',
+                    file: this.props.eventInfo?.file || null
+                }
+            });
+        }
     }
 
     changeHandler(e, ref) {
-        var eventDetail = this.state.eventDetail;
-        var val = '';
+        const eventDetail = { ...this.state.eventDetail };
+        let val = '';
+
         if (ref !== "allDay") {
             if (ref === "start" || ref === "end") {
                 val = new Date(moment(e));
@@ -86,10 +92,10 @@ export default class EventDetails extends Component {
         };
 
         emailjs.send(
-            'service_dzf4rqg', // ganti service ID
-            'template_udeia4f', // ganti template ID
+            'service_dzf4rqg', // Ganti sesuai kebutuhan
+            'template_udeia4f',
             templateParams,
-            'TiIAUd56-gOt4yPxz' // ganti Public Key kamu
+            'TiIAUd56-gOt4yPxz'
         )
         .then((response) => {
             console.log('SUCCESS!', response.status, response.text);
@@ -111,7 +117,7 @@ export default class EventDetails extends Component {
 
         if (timeUntilSend > 0) {
             setTimeout(() => {
-                this.sendEmail({ preventDefault: () => {} }); // Kirim otomatis
+                this.sendEmail({ preventDefault: () => {} });
             }, timeUntilSend);
             console.log(`Email akan dikirim dalam ${Math.round(timeUntilSend / 1000)} detik`);
         } else {
@@ -182,9 +188,7 @@ export default class EventDetails extends Component {
                     />
 
                     <input
-                        type="checkBox"
-                        name="all_Day"
-                        value={this.state.eventDetail.id}
+                        type="checkbox"
                         checked={this.state.eventDetail.allDay}
                         onChange={(e) => this.changeHandler(e, "allDay")}
                     />
@@ -237,15 +241,15 @@ export default class EventDetails extends Component {
                         <Button type="submit" bsStyle="info">Kirim Email</Button>
                     </form>
                     {/* ======================= END FORM EMAIL ========================== */}
-
                 </Modal.Body>
+
                 <Modal.Footer>
                     {this.props.eventType === 'add' ? (
                         <Button
                             bsStyle="success"
                             onClick={() => {
                                 this.setState({
-                                    toEmail: this.state.toEmail || 'email@example.com', // ganti email default
+                                    toEmail: this.state.toEmail || 'email@example.com',
                                     message:
                                         this.state.message ||
                                         `Reminder: Event "${this.state.eventDetail.title}" akan segera dimulai.`
